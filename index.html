@@ -467,7 +467,7 @@
         <input type="text" class="form-input" id="cardNumber" value="NVE • #001" placeholder="Enter card number">
       </div>
       
-      <button class="export-btn" onclick="exportToPNG()">📥 Download PNG</button>
+      <button class="export-btn" onclick="previewFull()">🔍 Preview Full</button>
     </div>
     
     <!-- Card Preview -->
@@ -605,45 +605,50 @@
       document.getElementById('influenceDisplay').textContent = influence;
     }
     
-    async function exportToPNG() {
-      const card = document.getElementById('cardToExport');
-      const exportBtn = document.querySelector('.export-btn');
-      
-      exportBtn.textContent = '⏳ Generating...';
-      exportBtn.disabled = true;
-      
-      try {
-        const canvas = await html2canvas(card, {
-          width: 300,
-          height: 450,
-          scale: 3,
-          backgroundColor: null,
-          useCORS: true,
-          allowTaint: true,
-          removeContainer: true,
-          imageTimeout: 0,
-          logging: false
-        });
-        
-        const link = document.createElement('a');
-        const charName = document.getElementById('charName').value || 'Character';
-        link.download = `${charName.replace(/\s+/g, '_')}_Arcadia_Card.png`;
-        link.href = canvas.toDataURL('image/png', 1.0);
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        showNotification('✅ Kartu Arcadia berhasil didownload!');
-        
-      } catch (error) {
-        console.error('Export failed:', error);
-        showNotification('❌ Gagal mengexport kartu');
-      }
-      
-      exportBtn.textContent = '📥 Download PNG';
-      exportBtn.disabled = false;
-    }
+  function previewFull() {
+  const card = document.getElementById("cardToExport");
+  const cardClone = card.cloneNode(true); // duplikat kartu
+
+  // Bungkus popup fullscreen
+  const overlay = document.createElement("div");
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+  `;
+
+  // Styling kartu di mode full
+  cardClone.style.transform = "scale(1.5)";
+  cardClone.style.boxShadow = "0 0 30px rgba(0,0,0,0.8)";
+
+  // Tombol tutup
+  const closeBtn = document.createElement("button");
+  closeBtn.textContent = "✖";
+  closeBtn.style.cssText = `
+    position: absolute;
+    top: 15px; right: 15px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+  `;
+  closeBtn.onclick = () => overlay.remove();
+
+  overlay.appendChild(cardClone);
+  overlay.appendChild(closeBtn);
+  document.body.appendChild(overlay);
+}
+
+
+
     
     function showNotification(message) {
       const notification = document.createElement('div');
